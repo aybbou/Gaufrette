@@ -54,6 +54,7 @@ class Ftp implements Adapter,
      */
     public function read($key)
     {
+        $this->connect();
         $this->ensureDirectoryExists($this->directory, $this->create);
 
         $temp = fopen('php://temp', 'r+');
@@ -74,6 +75,7 @@ class Ftp implements Adapter,
      */
     public function write($key, $content)
     {
+        $this->connect();
         $this->ensureDirectoryExists($this->directory, $this->create);
 
         $path = $this->computePath($key);
@@ -101,6 +103,7 @@ class Ftp implements Adapter,
      */
     public function rename($sourceKey, $targetKey)
     {
+        $this->connect();
         $this->ensureDirectoryExists($this->directory, $this->create);
 
         $sourcePath = $this->computePath($sourceKey);
@@ -116,6 +119,7 @@ class Ftp implements Adapter,
      */
     public function exists($key)
     {
+        $this->connect();
         $this->ensureDirectoryExists($this->directory, $this->create);
 
         $file  = $this->computePath($key);
@@ -140,6 +144,7 @@ class Ftp implements Adapter,
      */
     public function keys()
     {
+        $this->connect();
         $this->ensureDirectoryExists($this->directory, $this->create);
 
         $keys = $this->fetchKeys();
@@ -152,6 +157,7 @@ class Ftp implements Adapter,
      */
     public function listKeys($prefix = '')
     {
+        $this->connect();
         $this->ensureDirectoryExists($this->directory, $this->create);
 
         preg_match('/(.*?)[^\/]*$/', $prefix, $match);
@@ -181,6 +187,7 @@ class Ftp implements Adapter,
      */
     public function mtime($key)
     {
+        $this->connect();
         $this->ensureDirectoryExists($this->directory, $this->create);
 
         $mtime = ftp_mdtm($this->getConnection(), $this->computePath($key));
@@ -198,6 +205,7 @@ class Ftp implements Adapter,
      */
     public function delete($key)
     {
+        $this->connect();
         $this->ensureDirectoryExists($this->directory, $this->create);
 
         if ($this->isDirectory($key)) {
@@ -212,6 +220,7 @@ class Ftp implements Adapter,
      */
     public function isDirectory($key)
     {
+        $this->connect();
         $this->ensureDirectoryExists($this->directory, $this->create);
 
         return $this->isDir($this->computePath($key));
@@ -227,6 +236,7 @@ class Ftp implements Adapter,
      */
     public function listDirectory($directory = '')
     {
+        $this->connect();
         $this->ensureDirectoryExists($this->directory, $this->create);
 
         $directory = preg_replace('/^[\/]*([^\/].*)$/', '/$1', $directory);
@@ -269,6 +279,7 @@ class Ftp implements Adapter,
      */
     public function createFile($key, Filesystem $filesystem)
     {
+        $this->connect();
         $this->ensureDirectoryExists($this->directory, $this->create);
 
         $file = new File($key, $filesystem);
@@ -301,6 +312,7 @@ class Ftp implements Adapter,
      */
     protected function ensureDirectoryExists($directory, $create = false)
     {
+        $this->connect();
         if (!$this->isDir($directory)) {
             if (!$create) {
                 throw new \RuntimeException(sprintf('The directory \'%s\' does not exist.', $directory));
@@ -319,6 +331,7 @@ class Ftp implements Adapter,
      */
     protected function createDirectory($directory)
     {
+        $this->connect();
         // create parent directory if needed
         $parent = dirname($directory);
         if (!$this->isDir($parent)) {
@@ -338,6 +351,7 @@ class Ftp implements Adapter,
      */
     private function isDir($directory)
     {
+        $this->connect();
         if ('/' === $directory) {
             return true;
         }
@@ -354,6 +368,7 @@ class Ftp implements Adapter,
 
     private function fetchKeys($directory = '', $onlyKeys = true)
     {
+        $this->connect();
         $directory = preg_replace('/^[\/]*([^\/].*)$/', '/$1', $directory);
 
         $lines = ftp_rawlist($this->getConnection(), '-alR '. $this->directory . $directory);
@@ -421,6 +436,7 @@ class Ftp implements Adapter,
      */
     private function parseRawlist(array $rawlist)
     {
+        $this->connect();
         $parsed = array();
         foreach ($rawlist as $line) {
             $infos = preg_split("/[\s]+/", $line, 9);
@@ -458,6 +474,7 @@ class Ftp implements Adapter,
      */
     private function computePath($key)
     {
+        $this->connect();
         return rtrim($this->directory, '/') . '/' . $key;
     }
 
